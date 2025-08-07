@@ -1,15 +1,23 @@
+import { caller, getQueryClient, trpc } from "@/trpc/server";
+import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
+import { Client } from "./client";
+import { Suspense } from "react";
 
-import { prisma } from "@/lib/db";
+
+
 
 const Page = async () => {
-   const posts = await prisma.Post.findMany(); 
-  return ( 
-   <div>
-     {
-      JSON.stringify(posts,null,2)
-     }
-   </div>
-   );
+  const queryClient = getQueryClient();
+  void queryClient.prefetchQuery(trpc.createAI.queryOptions({ text: "hemant prefetch " }))
+
+  return (
+    <HydrationBoundary state={dehydrate(queryClient)}>
+      <Suspense fallback={<p>...Loading..</p>}>
+        <Client />
+      </Suspense>
+
+    </HydrationBoundary>
+  );
 }
- 
+
 export default Page;
